@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guitar Journey 🎸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0F0E17;
+    --bg2:       #1A1826;
+    --bg3:       #23213A;
+    --card:      #1E1C30;
+    --cardHov:   #252342;
+    --border:    rgba(255,255,255,0.08);
+    --borderHi:  rgba(255,165,0,0.45);
+    --amber:     #F5A623;
+    --amberDark: #C47D0E;
+    --amberSoft: rgba(245,166,35,0.12);
+    --amberGlow: rgba(245,166,35,0.25);
+    --green:     #2ECC71;
+    --greenBg:   rgba(46,204,113,0.12);
+    --red:       #E74C3C;
+    --redBg:     rgba(231,76,60,0.12);
+    --purple:    #9B59B6;
+    --purpleBg:  rgba(155,89,182,0.12);
+    --text:      #F0EAF8;
+    --textMid:   #A89FC0;
+    --textDim:   #6B6280;
+    --radius:    12px;
+    --radiusSm:  8px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* LAYOUT */
+  .app-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .header-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: var(--amber);
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .header-sub {
+    font-size: 14px;
+    color: var(--textMid);
+  }
+  .xp-section { margin-top: 1.25rem; }
+  .xp-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--textDim);
+    margin-bottom: 6px;
+  }
+  .xp-track {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #C47D0E, #F5A623);
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 5px;
+    margin-bottom: 1.75rem;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: var(--radiusSm);
+    border: none;
+    background: transparent;
+    color: var(--textMid);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tab:hover:not(.active) { background: var(--bg3); color: var(--text); }
+  .tab.active {
+    background: var(--amber);
+    color: #1A0C00;
+    font-weight: 600;
+  }
+  .tab svg { width: 15px; height: 15px; }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* LESSON LIST */
+  .lesson-list { display: flex; flex-direction: column; gap: 10px; }
+  .lesson-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lesson-card:hover:not(.locked) {
+    border-color: var(--borderHi);
+    background: var(--cardHov);
+    transform: translateX(2px);
+  }
+  .lesson-card.locked { opacity: 0.45; cursor: not-allowed; }
+  .lesson-card.next-up { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amberGlow) inset; }
+  .lesson-card.done { border-color: rgba(46,204,113,0.3); }
+  .lesson-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--bg3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .lesson-card.done .lesson-icon { background: var(--greenBg); }
+  .lesson-card.next-up .lesson-icon { background: var(--amberSoft); }
+  .lesson-body { flex: 1; min-width: 0; }
+  .lesson-title { font-size: 15px; font-weight: 500; color: var(--text); }
+  .lesson-sub { font-size: 12px; color: var(--textMid); margin-top: 2px; }
+  .lesson-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+  }
+  .pill-done { background: var(--greenBg); color: var(--green); }
+  .pill-go { background: var(--amberSoft); color: var(--amber); }
+  .pill-lock { background: var(--bg3); color: var(--textDim); }
+
+  /* LESSON DETAIL */
+  .lesson-detail { display: none; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--textMid);
+    background: none; border: none;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    margin-bottom: 1.25rem;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--amber); }
+  .lesson-content-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+  }
+  .lesson-content-box h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--amber);
+    margin-bottom: 0.75rem;
+  }
+  .lesson-content-box p {
+    font-size: 14px; color: var(--textMid);
+    line-height: 1.8; margin-bottom: 1rem;
+  }
+  .lesson-content-box ul {
+    padding-left: 1.25rem;
+    font-size: 14px; color: var(--textMid);
+    line-height: 2; margin-bottom: 1rem;
+  }
+  .lesson-content-box li::marker { color: var(--amber); }
+  .complete-btn {
+    display: block; width: 100%;
+    margin-top: 1.25rem; padding: 14px;
+    background: var(--amber);
+    color: #1A0C00;
+    border: none; border-radius: var(--radiusSm);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .complete-btn:hover { background: #FFB930; transform: scale(1.01); }
+  .complete-btn:active { transform: scale(0.99); }
+  .done-msg {
+    margin-top: 1rem; text-align: center;
+    font-size: 14px; color: var(--green);
+    font-weight: 500;
+  }
+
+  /* CHORDS */
+  .chord-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .chord-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chord-card:hover { border-color: var(--borderHi); background: var(--cardHov); }
+  .chord-card.selected { border-color: var(--amber); background: var(--amberSoft); }
+  .chord-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; color: var(--amber);
+    margin-bottom: 4px;
+  }
+  .chord-label { font-size: 12px; color: var(--textMid); }
+  .chord-lv {
+    display: inline-block;
+    margin-top: 8px; font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 99px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .lv-beg { background: var(--greenBg); color: var(--green); }
+  .lv-int { background: var(--amberSoft); color: var(--amber); }
+  .lv-adv { background: var(--redBg); color: var(--red); }
+
+  .fretboard-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .fb-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .fb-hint { font-size: 13px; color: var(--textMid); margin-bottom: 1.25rem; line-height: 1.6; }
+
+  /* QUIZ */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 1.25rem;
+  }
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-num { font-size: 26px; font-weight: 600; color: var(--amber); font-family: 'Playfair Display', serif; }
+  .stat-lbl { font-size: 11px; color: var(--textDim); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .quiz-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+  }
+  .quiz-q {
+    font-size: 14px; color: var(--textMid);
+    text-align: center; margin-bottom: 1rem;
+    text-transform: uppercase; letter-spacing: 0.8px; font-size: 11px;
+  }
+  .quiz-opts {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 1.5rem;
+  }
+  .opt-btn {
+    padding: 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radiusSm);
+    color: var(--text);
+    font-size: 18px; font-weight: 600;
+    font-family: 'Playfair Display', serif;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--amber);
+    background: var(--amberSoft);
+    color: var(--amber);
+  }
+  .opt-btn.correct {
+    background: var(--greenBg);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .opt-btn.wrong {
+    background: var(--redBg);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .opt-btn:disabled { cursor: default; }
+  .quiz-feedback {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+    min-height: 26px;
+    margin-top: 1rem;
+  }
+  .fb-good { color: var(--green); }
+  .fb-bad { color: var(--red); }
+  .next-quiz-btn {
+    display: block; width: 100%;
+    margin-top: 1.25rem; padding: 13px;
+    background: transparent;
+    border: 1px solid var(--borderHi);
+    color: var(--amber);
+    border-radius: var(--radiusSm);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+  }
+  .next-quiz-btn:hover { background: var(--amberSoft); }
+
+  /* BADGES */
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .badge-tile {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .badge-tile.earned {
+    border-color: var(--amber);
+    background: var(--amberSoft);
+    box-shadow: 0 0 0 1px var(--amberGlow) inset;
+  }
+  .badge-tile.locked-b { opacity: 0.4; }
+  .badge-icon-big { font-size: 36px; margin-bottom: 10px; display: block; }
+  .badge-t { font-size: 14px; font-weight: 600; color: var(--text); }
+  .badge-tile.earned .badge-t { color: var(--amber); }
+  .badge-d { font-size: 12px; color: var(--textDim); margin-top: 4px; line-height: 1.5; }
+
+  /* FRETBOARD SVG */
+  .fb-svg-wrap { display: flex; justify-content: center; }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+
+  <div class="header">
+    <div class="header-logo">🎸 Guitar Journey</div>
+    <div class="header-sub">Learn chords, practice daily, and track your progress</div>
+    <div class="xp-section">
+      <div class="xp-row">
+        <span>Level 1 — Beginner</span>
+        <span><span id="xpNum">60</span> / 500 XP</span>
+      </div>
+      <div class="xp-track">
+        <div class="xp-fill" id="xpFill" style="width:12%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" onclick="switchTab('lessons')" role="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Lessons
+    </button>
+    <button class="tab" onclick="switchTab('chords')" role="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Chords
+    </button>
+    <button class="tab" onclick="switchTab('quiz')" role="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Quiz
+    </button>
+    <button class="tab" onclick="switchTab('badges')" role="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      Badges
+    </button>
+  </div>
+
+  <!-- LESSONS -->
+  <div class="section active" id="sec-lessons">
+    <div id="lesson-list" class="lesson-list"></div>
+    <div id="lesson-detail" class="lesson-detail"></div>
+  </div>
+
+  <!-- CHORDS -->
+  <div class="section" id="sec-chords">
+    <div class="chord-grid" id="chordGrid"></div>
+    <div id="fretboardPanel" class="fretboard-panel" style="display:none"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="section" id="sec-quiz">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="qStreak">0</div><div class="stat-lbl">Streak 🔥</div></div>
+      <div class="stat-box"><div class="stat-num" id="qCorrect">0</div><div class="stat-lbl">Correct ✓</div></div>
+      <div class="stat-box"><div class="stat-num" id="qTotal">0</div><div class="stat-lbl">Answered</div></div>
+    </div>
+    <div class="quiz-card" id="quizCard"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="section" id="sec-badges">
+    <div class="badges-grid" id="badgesGrid"></div>
+  </div>
+
+</div>
+
+<footer style="text-align:center; padding: 2rem 1rem 2.5rem; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 1rem;">
+  <p style="font-family:'Playfair Display',serif; font-size:15px; color:#6B6280; letter-spacing:0.5px;">
+    Made with 🎸 &amp; love &nbsp;·&nbsp; <span style="color:#F5A623;">From: You Know Who</span>
+  </p>
+</footer>
+
+<script>
+const state = {
+  xp: 60,
+  streak: 0,
+  correct: 0,
+  total: 0,
+  completedLessons: [],
+  earnedBadges: ['first-chord']
+};
+
+const lessons = [
+  {
+    id: 'l1', icon: '🎸',
+    title: 'Meet the guitar',
+    sub: 'Parts, posture & holding your pick',
+    html: `<h2>Meet your guitar</h2>
+<p>Before playing, know your instrument. A standard guitar has 6 strings tuned to E-A-D-G-B-e (low to high). The headstock holds the tuning pegs, the neck holds the frets, and the body amplifies the sound.</p>
+<ul>
+  <li>Sit upright with the guitar waist resting on your thigh</li>
+  <li>Keep your fretting wrist relaxed and gently curved</li>
+  <li>Hold the pick between thumb and index finger at a slight angle</li>
+  <li>Try plucking each string gently from low E (thickest) to high e (thinnest)</li>
+</ul>
+<p>Take your time getting comfortable before trying any chords. Good posture from the start saves a lot of trouble later!</p>`
+  },
+  {
+    id: 'l2', icon: '📊',
+    title: 'Reading chord diagrams',
+    sub: 'Vertical lines, dots, and numbers',
+    html: `<h2>Reading chord diagrams</h2>
+<p>A chord diagram shows the guitar neck head-on. Vertical lines are strings — left is low E, right is high e. Horizontal lines are frets. Dots show where to place your fingers.</p>
+<ul>
+  <li>Numbers inside dots = which finger (1=index, 2=middle, 3=ring, 4=pinky)</li>
+  <li>An "O" above a string = play it open (unfretted)</li>
+  <li>An "X" above a string = mute or skip it</li>
+  <li>A curved line across strings = barre chord (one finger holds all strings)</li>
+</ul>
+<p>Practice reading the Em diagram in the Chords tab — it's the simplest one to start with!</p>`
+  },
+  {
+    id: 'l3', icon: '✋',
+    title: 'Your first chord: Em',
+    sub: 'The easiest chord on guitar',
+    html: `<h2>Em — your first chord</h2>
+<p>E minor uses just 2 fingers and rings out beautifully across all 6 strings. Here's how to form it:</p>
+<ul>
+  <li>Place finger 2 (middle) on string 5, fret 2</li>
+  <li>Place finger 3 (ring) on string 4, fret 2</li>
+  <li>Strum all 6 strings — every single one rings!</li>
+  <li>Listen for buzzing — press more firmly if you hear it</li>
+</ul>
+<p>Strum slowly and evenly. Em sounds great and moody — perfect for hundreds of songs. Once it feels natural, you're ready for the next chord!</p>`
+  },
+  {
+    id: 'l4', icon: '🎵',
+    title: 'Strumming basics',
+    sub: 'Down, up, and finding your rhythm',
+    html: `<h2>Strumming patterns</h2>
+<p>Strumming is all about feel and rhythm. Start with slow downstrokes on every beat:</p>
+<ul>
+  <li>Count "1 — 2 — 3 — 4" and strum down on each beat</li>
+  <li>Keep your wrist loose — it should swing, not push</li>
+  <li>Pattern 1: Down Down Down Down (all beats)</li>
+  <li>Pattern 2: Down — Down-Up — Down (simple country rhythm)</li>
+  <li>Pattern 3: Down-Up Down-Up Down-Up (triplet feel)</li>
+</ul>
+<p>Practice strumming Em for 2 minutes with a steady rhythm before moving on. Consistency beats speed every time.</p>`
+  },
+  {
+    id: 'l5', icon: '🎶',
+    title: 'First song: Knockin\'',
+    sub: 'Play your first real song!',
+    html: `<h2>First song!</h2>
+<p>You're ready to play! "Knockin' on Heaven's Door" uses just two chords: G and D. The progression repeats through the whole song.</p>
+<ul>
+  <li>G chord: fingers on strings 6(fret 3), 1(fret 3), 2(fret 3)</li>
+  <li>D chord: fingers on strings 3(fret 2), 1(fret 2), 2(fret 3)</li>
+  <li>Switch slowly at first — chord changes are the hardest part</li>
+  <li>Strum 4 slow beats on G, then 4 beats on D</li>
+  <li>Repeat and gradually increase speed</li>
+</ul>
+<p>Go slow! Speed always comes with time. Smooth chord changes at half speed beat sloppy changes at full speed every time. You've got this! 🎉</p>`
+  }
+];
+
+const chords = [
+  {
+    name: 'Em', label: 'E minor', level: 'Beginner',
+    fingers: [[5,2,'2'],[4,2,'3']], mute: [], open: [1,2,3,6],
+    desc: 'The easiest chord to start with! Place fingers 2 and 3 on strings 5 and 4 at fret 2. Strum all 6 strings freely.'
+  },
+  {
+    name: 'Am', label: 'A minor', level: 'Beginner',
+    fingers: [[4,2,'1'],[3,2,'2'],[2,1,'2']], mute: [6], open: [1,5],
+    desc: 'A rich, emotional chord. Mute the low E string. Use 3 fingers across strings 4, 3, and 2.'
+  },
+  {
+    name: 'G', label: 'G major', level: 'Beginner',
+    fingers: [[6,3,'2'],[1,3,'4'],[2,3,'3']], mute: [], open: [3,4,5],
+    desc: 'Big, bright, and full! Strum all 6 strings. One of the most common chords in all of music.'
+  },
+  {
+    name: 'C', label: 'C major', level: 'Beginner',
+    fingers: [[5,3,'3'],[4,2,'2'],[2,1,'1']], mute: [6], open: [1,3],
+    desc: 'Warm and cheerful. Avoid the low E string. The finger stretch gets easier with practice!'
+  },
+  {
+    name: 'D', label: 'D major', level: 'Beginner',
+    fingers: [[3,2,'1'],[1,2,'2'],[2,3,'3']], mute: [6,5], open: [4],
+    desc: 'Crisp and bright — only strum strings 4 through 1. Great paired with G and A.'
+  },
+  {
+    name: 'F', label: 'F major', level: 'Intermediate',
+    fingers: [[1,1,'1'],[2,1,'1'],[3,2,'2'],[4,3,'3'],[5,3,'4'],[6,1,'1']], mute: [], open: [],
+    desc: 'The famous barre chord — your index finger presses all 6 strings at fret 1. It takes weeks of practice. Don\'t give up!'
+  }
+];
+
+const allBadges = [
+  { id: 'first-chord', icon: '🎸', title: 'First chord!', desc: 'Started your guitar journey' },
+  { id: 'lesson1', icon: '📖', title: "Beginner's mind", desc: 'Completed lesson 1' },
+  { id: 'lesson3', icon: '✋', title: 'Fingertips!', desc: 'Learned the Em chord' },
+  { id: 'lesson5', icon: '🎶', title: 'Song bird', desc: 'Completed all 5 lessons' },
+  { id: 'streak3', icon: '🔥', title: 'On fire!', desc: '3 quiz answers in a row' },
+  { id: 'quiz10', icon: '⚡', title: 'Quiz master', desc: '10 correct quiz answers' }
+];
+
+let quizAnswered = false, quizChord = null;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['lessons','chords','quiz','badges'][i] === tab);
+  });
+  document.querySelectorAll('.section').forEach((s, i) => {
+    s.classList.toggle('active', ['lessons','chords','quiz','badges'][i] === tab);
+  });
+  if (tab === 'quiz') renderQuiz();
+}
+
+function updateXP() {
+  const xp = Math.min(state.xp, 500);
+  document.getElementById('xpFill').style.width = Math.round(xp / 500 * 100) + '%';
+  document.getElementById('xpNum').textContent = xp;
+}
+
+function earnBadge(id) {
+  if (!state.earnedBadges.includes(id)) {
+    state.earnedBadges.push(id);
+    renderBadges();
+  }
+}
+
+/* ── LESSONS ── */
+function renderLessons() {
+  const list = document.getElementById('lesson-list');
+  list.innerHTML = '';
+  list.style.display = 'flex';
+  list.style.flexDirection = 'column';
+  list.style.gap = '10px';
+  document.getElementById('lesson-detail').style.display = 'none';
+
+  lessons.forEach((l, i) => {
+    const done = state.completedLessons.includes(l.id);
+    const locked = i > 0 && !state.completedLessons.includes(lessons[i-1].id);
+    const next = !done && !locked;
+
+    const card = document.createElement('div');
+    card.className = 'lesson-card' + (done ? ' done' : '') + (locked ? ' locked' : '') + (next ? ' next-up' : '');
+    card.innerHTML = `
+      <div class="lesson-icon">${l.icon}</div>
+      <div class="lesson-body">
+        <div class="lesson-title">${l.title}</div>
+        <div class="lesson-sub">${l.sub}</div>
+      </div>
+      <span class="lesson-pill ${done ? 'pill-done' : locked ? 'pill-lock' : 'pill-go'}">
+        ${done ? '✓ Done' : locked ? '🔒 Locked' : '▶ Start'}
+      </span>
+    `;
+    if (!locked) card.onclick = () => openLesson(l);
+    list.appendChild(card);
+  });
+}
+
+function openLesson(l) {
+  document.getElementById('lesson-list').style.display = 'none';
+  const detail = document.getElementById('lesson-detail');
+  detail.style.display = 'block';
+  const done = state.completedLessons.includes(l.id);
+  detail.innerHTML = `
+    <button class="back-btn" onclick="closeLesson()">
+      ← Back to lessons
+    </button>
+    <div class="lesson-content-box">
+      ${l.html}
+      ${!done
+        ? `<button class="complete-btn" onclick="completeLesson('${l.id}')">Mark complete — earn +50 XP ✨</button>`
+        : `<div class="done-msg">✓ Lesson completed!</div>`
+      }
+    </div>
+  `;
+}
+
+function closeLesson() {
+  renderLessons();
+}
+
+function completeLesson(id) {
+  if (!state.completedLessons.includes(id)) {
+    state.completedLessons.push(id);
+    state.xp += 50;
+    if (id === 'l1') earnBadge('lesson1');
+    if (id === 'l3') earnBadge('lesson3');
+    if (id === 'l5') earnBadge('lesson5');
+    updateXP();
+  }
+  closeLesson();
+}
+
+/* ── CHORDS ── */
+function renderChords() {
+  const grid = document.getElementById('chordGrid');
+  grid.innerHTML = '';
+  chords.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'chord-card';
+    const lvClass = c.level === 'Beginner' ? 'lv-beg' : c.level === 'Intermediate' ? 'lv-int' : 'lv-adv';
+    card.innerHTML = `
+      <div class="chord-name">${c.name}</div>
+      <div class="chord-label">${c.label}</div>
+      <span class="chord-lv ${lvClass}">${c.level}</span>
+    `;
+    card.onclick = () => {
+      document.querySelectorAll('.chord-card').forEach(x => x.classList.remove('selected'));
+      card.classList.add('selected');
+      showChord(c);
+    };
+    grid.appendChild(card);
+  });
+}
+
+function showChord(c) {
+  const panel = document.getElementById('fretboardPanel');
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="fb-title">${c.name} — ${c.label}</div>
+    <div class="fb-hint">${c.desc}</div>
+    <div class="fb-svg-wrap">${makeFretboard(c)}</div>
+  `;
+}
+
+function makeFretboard(chord) {
+  const S = 6, F = 5;
+  const W = 280, H = 190;
+  const pl = 38, pt = 38, pr = 24, pb = 24;
+  const sw = (W - pl - pr) / (S - 1);
+  const fh = (H - pt - pb) / F;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="280" height="190">`;
+  svg += `<rect width="${W}" height="${H}" fill="#1A1826" rx="10"/>`;
+
+  for (let f = 0; f <= F; f++) {
+    const y = pt + f * fh;
+    svg += `<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="${f===0 ? '#F5A623' : '#3A3558'}" stroke-width="${f===0 ? 2.5 : 1}"/>`;
+  }
+
+  for (let s = 0; s < S; s++) {
+    const x = pl + s * sw;
+    const sw2 = 0.5 + (S - 1 - s) * 0.35;
+    svg += `<line x1="${x}" y1="${pt}" x2="${x}" y2="${pt + F*fh}" stroke="#3A3558" stroke-width="${sw2}"/>`;
+
+    const sn = 6 - s;
+    const label = chord.mute.includes(sn) ? '✕' : chord.open.includes(sn) ? 'O' : '';
+    if (label) {
+      const col = label === '✕' ? '#E74C3C' : '#2ECC71';
+      svg += `<text x="${x}" y="${pt - 12}" text-anchor="middle" font-size="12" fill="${col}" font-family="Inter,sans-serif" font-weight="600">${label}</text>`;
+    }
+    const strNames = ['e','B','G','D','A','E'];
+    svg += `<text x="${x}" y="${H - 5}" text-anchor="middle" font-size="10" fill="#6B6280" font-family="Inter,sans-serif">${strNames[s]}</text>`;
+  }
+
+  chord.fingers.forEach(([str, fret, finger]) => {
+    const x = pl + (6 - str) * sw;
+    const y = pt + (fret - 0.5) * fh;
+    svg += `<circle cx="${x}" cy="${y}" r="13" fill="#F5A623"/>`;
+    svg += `<text x="${x}" y="${y + 5}" text-anchor="middle" font-size="12" fill="#1A0C00" font-weight="700" font-family="Inter,sans-serif">${finger}</text>`;
+  });
+
+  for (let f = 1; f <= F; f++) {
+    const y = pt + (f - 0.5) * fh;
+    svg += `<text x="${pl - 14}" y="${y + 4}" text-anchor="middle" font-size="10" fill="#6B6280" font-family="Inter,sans-serif">${f}</text>`;
+  }
+
+  svg += '</svg>';
+  return svg;
+}
+
+/* ── QUIZ ── */
+const quizPool = chords.slice(0, 5);
+
+function renderQuiz() {
+  quizAnswered = false;
+  quizChord = quizPool[Math.floor(Math.random() * quizPool.length)];
+  const wrong = quizPool.filter(c => c.name !== quizChord.name).sort(() => Math.random() - 0.5).slice(0, 3);
+  const opts = [...wrong, quizChord].sort(() => Math.random() - 0.5);
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="quiz-q">Identify this chord</div>
+    <div style="display:flex;justify-content:center">${makeFretboard(quizChord)}</div>
+    <div class="quiz-opts">
+      ${opts.map(o => `<button class="opt-btn" onclick="checkAnswer('${o.name}', this)">${o.name}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="quizFb"></div>
+  `;
+  updateQuizStats();
+}
+
+function checkAnswer(name, btn) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  state.total++;
+  const ok = name === quizChord.name;
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === quizChord.name) b.classList.add('correct');
+  });
+  const fb = document.getElementById('quizFb');
+  if (ok) {
+    btn.classList.add('correct');
+    state.correct++;
+    state.streak++;
+    state.xp += 10;
+    if (state.streak >= 3) earnBadge('streak3');
+    if (state.correct >= 10) earnBadge('quiz10');
+    const wins = ['Nailed it! 🎯', 'Perfect! 🌟', "You're on fire! 🔥", 'Great job! 🎸'];
+    fb.textContent = wins[Math.floor(Math.random() * wins.length)];
+    fb.className = 'quiz-feedback fb-good';
+  } else {
+    btn.classList.add('wrong');
+    state.streak = 0;
+    fb.textContent = `That's ${quizChord.name}. Keep practicing!`;
+    fb.className = 'quiz-feedback fb-bad';
+  }
+  updateXP();
+  updateQuizStats();
+
+  const nb = document.createElement('button');
+  nb.className = 'next-quiz-btn';
+  nb.textContent = '→ Next chord';
+  nb.onclick = renderQuiz;
+  document.getElementById('quizCard').appendChild(nb);
+}
+
+function updateQuizStats() {
+  document.getElementById('qStreak').textContent = state.streak;
+  document.getElementById('qCorrect').textContent = state.correct;
+  document.getElementById('qTotal').textContent = state.total;
+}
+
+/* ── BADGES ── */
+function renderBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = '';
+  allBadges.forEach(b => {
+    const earned = state.earnedBadges.includes(b.id);
+    const tile = document.createElement('div');
+    tile.className = 'badge-tile' + (earned ? ' earned' : ' locked-b');
+    tile.innerHTML = `
+      <span class="badge-icon-big">${earned ? b.icon : '🔒'}</span>
+      <div class="badge-t">${b.title}</div>
+      <div class="badge-d">${b.desc}</div>
+    `;
+    grid.appendChild(tile);
+  });
+}
+
+renderLessons();
+renderChords();
+renderBadges();
+</script>
+</body>
+</html>
